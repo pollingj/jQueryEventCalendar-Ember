@@ -8,7 +8,7 @@
 		Paradigma Tecnologico (@paradigmate)
 */
 
-;$.fn.eventCalendar = function(options){
+;$.fn.eventCalendar = function(options, detail_callback){
 
 	var eventsOpts = $.extend({}, $.fn.eventCalendar.defaults, options);
 
@@ -18,6 +18,12 @@
 		directionLeftMove: "300",
 		eventsJson: {}
 	}
+
+
+  if (typeof detail_callback == 'function') { // make sure the callback is a function
+    var detail_event_callback = detail_callback; // brings the scope to the callback
+  }
+
 
 	// each eventCalendar will execute this function
 	this.each(function(){
@@ -71,12 +77,20 @@
 			e.preventDefault();
 			var desc = $(this).parent().find('.eventDesc');
 
-			if (!desc.find('a').size()) {
+			if (!desc.find('a.eventTitle').size()) {
 				var eventUrl = $(this).attr('href');
 				var eventTarget = $(this).attr('target');
+				var eventId = $(this).data('id');
 
 				// create a button to go to event url
-				desc.append('<a href="' + eventUrl + '" target="'+eventTarget+'" class="bt">'+eventsOpts.txt_GoToEventUrl+'</a>')
+        detail_link = $('<a href="' + eventUrl + '" target="'+eventTarget+'" class="bt" data-id="' + eventId + '">'+eventsOpts.txt_GoToEventUrl+'</a>');
+				desc.append(detail_link);
+        detail_link.click(function(e) {
+          e.preventDefault();
+          var id = $(this).data('id');
+          detail_event_callback(id); // brings the scope to the callback
+        });
+
 			}
 
 			if (desc.is(':visible')) {
@@ -361,7 +375,7 @@
 									eventStringDate = moment(eventDate).format(eventsOpts.dateFormat);
 
 									if (event.url) {
-										var eventTitle = '<a href="'+event.url+'" target="' + eventLinkTarget + '" class="eventTitle">' + event.title + '</a>';
+										var eventTitle = '<a href="'+event.url+'" target="' + eventLinkTarget + '" class="eventTitle" data-id="' + event.id + '">' + event.title + '</a>';
 									} else {
 										var eventTitle = '<span class="eventTitle">'+event.title+'</span>';
 									}
@@ -465,4 +479,3 @@ $.fn.eventCalendar.defaults = {
 	cacheJson: true	// if true plugin get a json only first time and after plugin filter events
 					// if false plugin get a new json on each date change
 };
-
