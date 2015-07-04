@@ -103,6 +103,11 @@
 			}
 
 		}
+    else {
+      var eventId = $(this).data('id');
+      e.preventDefault();
+      detail_event_callback(eventId);
+    }
 	});
 
 	function sortJson(a, b){
